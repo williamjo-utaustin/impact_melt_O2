@@ -1,0 +1,137 @@
+clc;
+clear;
+close all;
+
+Cmap1 = parula(4);
+
+load("complete_impact_2.mat");
+time = linspace(1,4500,4500);
+time = time/1000;
+
+
+figure(9)
+subplot(1,3,1)
+semilogy(time, avg_ast_melt_per_mya/1E6, LineWidth=4, Color = Cmap1(1,:))
+set(gca,'XDir','reverse')
+hold on
+
+%title('Avg Asteroid Melt Mass Generated in MYR Bins')
+xlabel('Time (GYA)')
+ylabel("Melt Mass Generated Per Year [kg yr^{-1}]")
+xlim([2.0,4.0]);
+ylim([1E8 1E16]);
+legend("Asteroid", FontSize=14)
+ax=gca;
+ax.XAxis.FontSize = 18;
+ax.YAxis.FontSize = 18;
+ax.XLabel.FontSize = 18;
+ax.YLabel.FontSize = 18;
+ax.Title.FontSize = 18;
+saveas(ax,'avg_ast_mlt_mass.png')
+
+
+%figure(10)
+subplot(1,3,2)
+semilogy(time, avg_com_melt_per_mya/1E6, LineWidth=4, Color = Cmap1(2,:))
+set(gca,'XDir','reverse')
+hold on
+
+%title('Comet Melt Mass Generated in MYR Bins')
+xlabel('Time (GYA)')
+ylabel("Melt Mass Generated Per Year [kg yr^{-1}]")
+xlim([2.0,4.0]);
+ylim([1E8 1E16]);
+
+legend("Comet", FontSize=14)
+ax=gca;
+ax.XAxis.FontSize = 18;
+ax.YAxis.FontSize = 18;
+ax.XLabel.FontSize = 18;
+ax.YLabel.FontSize = 18;
+ax.Title.FontSize = 18;
+saveas(ax,'avg_com_mlt_mass.png')
+
+%figure(11)
+subplot(1,3,3)
+semilogy(time, (avg_com_melt_per_mya+avg_ast_melt_per_mya)/1E6, LineWidth=4, Color = Cmap1(3,:))
+set(gca,'XDir','reverse')
+hold on
+
+%title('Avg Asteroid Melt Mass Generated in MYR Bins')
+xlabel('Time (GYA)')
+ylabel("Melt Mass Generated Per Year [kg yr^{-1}]")
+xlim([2.0,4.0]);
+ylim([1E8 1E16]);
+
+legend("Asteroid + Comet", FontSize=14)
+
+ax=gca;
+ax.XAxis.FontSize = 18;
+ax.YAxis.FontSize = 18;
+ax.XLabel.FontSize = 18;
+ax.YLabel.FontSize = 18;
+ax.Title.FontSize = 18;
+saveas(ax,'avg_tot_mlt_mass.png')
+
+
+
+% Cumulative melt mass generated
+
+figure(12)
+cum_ast_melt_mass = zeros(4500,1);
+cum_ast_melt_mass(4500,1) = avg_ast_melt_per_mya(4500,1);
+cum_com_melt_mass = zeros(4500,1);
+cum_com_melt_mass(4500,1) = avg_com_melt_per_mya(4500,1);
+
+for i = 4499:-1:1
+    cum_ast_melt_mass(i,1) = cum_ast_melt_mass(i+1,1) + avg_ast_melt_per_mya(i,1);
+    cum_com_melt_mass(i,1) = cum_com_melt_mass(i+1,1) + avg_com_melt_per_mya(i,1);
+
+end
+smooth_cum_ast_melt_mass = movmean(cum_ast_melt_mass,[250 250]);
+smooth_cum_com_melt_mass = movmean(cum_com_melt_mass,[250 250]);
+total = smooth_cum_com_melt_mass + smooth_cum_ast_melt_mass;
+
+
+
+tared_smooth_cum_ast_melt_mass = zeros(4500,1);
+tared_smooth_cum_com_melt_mass = zeros(4500,1);
+
+for i = 1:4500
+    tared_smooth_cum_ast_melt_mass(i,1) = smooth_cum_ast_melt_mass(i,1) - smooth_cum_ast_melt_mass(4000,1);
+    tared_smooth_cum_com_melt_mass(i,1) = smooth_cum_com_melt_mass(i,1) - smooth_cum_com_melt_mass(4000,1);
+end
+
+
+
+
+
+% smooth_plot = smooth(cum_ast_melt_mass);
+plot(time, tared_smooth_cum_ast_melt_mass, 'Color', Cmap1(1,:), 'LineWidth', 4, 'LineStyle','--')
+hold on
+
+
+set(gca,'XDir','reverse')
+% plot(time, cum_ast_melt_mass, 'Color', Cmap1(2,:), 'LineWidth', 2, 'LineStyle','--')
+% hold on
+
+plot(time, tared_smooth_cum_com_melt_mass,'Color', Cmap1(2,:), 'LineWidth', 4, 'LineStyle',':')
+hold on
+
+plot(time, tared_smooth_cum_ast_melt_mass + tared_smooth_cum_com_melt_mass, 'Color', Cmap1(3,:), 'LineWidth', 4, 'LineStyle','-')
+hold on
+
+
+xlabel('Time (GYA)')
+ylabel("Cumulative Melt Mass (kg)")
+xlim([2.0,4.0]);
+legend("Asteroids", "Comets", "Asteroids + Comets", 'FontSize', 14, Location="northwest");
+ylim([0E22,20E21])
+ax=gca;
+ax.XAxis.FontSize = 18;
+ax.YAxis.FontSize = 18;
+ax.XLabel.FontSize = 18;
+ax.YLabel.FontSize = 18;
+ax.Title.FontSize = 18;
+saveas(ax,'cum_mlt_mass.png')
+

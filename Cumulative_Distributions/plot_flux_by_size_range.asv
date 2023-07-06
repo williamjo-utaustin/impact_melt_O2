@@ -1,0 +1,38 @@
+clc;
+clear;
+close all;
+
+load("complete_impact_2.mat");
+
+Cmap1 = parula(4);
+
+for i = 1:10
+    if(impactor_gt_100km(i,1)>0)
+        ast_avg_gt_25(impactor_gt_100km(i,1),1) = ast_avg_gt_25(impactor_gt_100km(i,1),1) + 1/n_sims/earth_sa;
+    end
+end
+
+time = linspace(1,4500,4500);
+time = time/1000;
+smooth_ast_avg_01_10 = movmean(ast_avg_01_10,[25 250]);
+smooth_ast_avg_11_25 = movmean(ast_avg_11_25,[25 250]);
+smooth_ast_avg_gt_25 = movmean(ast_avg_gt_25,[25 250]);
+
+figure(13)
+
+semilogy(time, smooth_ast_avg_01_10, 'Color', Cmap1(1,:), 'LineWidth', 4, 'LineStyle','-')
+set(gca,'XDir','reverse')
+hold on
+semilogy(time, smooth_ast_avg_11_25, 'Color', Cmap1(2,:), 'LineWidth', 4, 'LineStyle',':')
+hold on
+semilogy(time, smooth_ast_avg_gt_25, 'Color', Cmap1(3,:), 'LineWidth', 4, 'LineStyle','-.')
+xlim([2.0,4.0]);
+
+legend("1 - 10 km Diameter", "Diameter11 - 25 km"," > 25 km",  Location="northeast", fontsize=14)
+
+ax=gca;
+ax.XAxis.FontSize = 18;
+ax.YAxis.FontSize = 18;
+ax.XLabel.FontSize = 18;
+ax.YLabel.FontSize = 18;
+ax.Title.FontSize = 18;
